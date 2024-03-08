@@ -1,0 +1,11 @@
+*/obj
+*/bin
+*.tmp
+
+~*
+*.stackdump
+
+bin/
+obj/
+
+*/.idea
