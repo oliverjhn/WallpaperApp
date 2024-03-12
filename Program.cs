@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-// ReSharper disable IdentifierTypo
-// ReSharper disable MemberCanBePrivate.Global
+using Octokit;
 
 namespace WallpaperApp;
 
@@ -9,34 +8,26 @@ internal class BackgroundChanger
     public const int SPI_SETDESKWALLPAPER = 20;
     public const int SPIF_UPDATEINFILE = 1;
     public const int SPIF_SENDCHANGE = 2;
-    
-    // ReSharper disable once InconsistentNaming
-    private static readonly HttpClient httpClient = new HttpClient();
+
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fulWinIni);
 
     private static void Main(string[] args)
     {
-        const string imagePath = @"C:\Wallpapers\1.jpg";
-        SetWallpaper(imagePath);
-        Task downloadImage = DownloadImage("https://raw.githubusercontent.com/D3Ext/aesthetic-wallpapers/main/images/3squares.png",
-            @"C:\Wallpapers\downloadedImage");
-        Task.WaitAny(downloadImage);
-
+        Task.WaitAny(GetInfo());
         Console.WriteLine("Press any key to exit.");
         Console.ReadKey();
     }
 
-    private static async Task DownloadImage(string downloadUrl, string filePath)
+    private static async Task<string> GetInfo()
     {
-        //Asynchronously downloads the file
-        HttpResponseMessage response = await httpClient.GetAsync(downloadUrl);
-
-        response.EnsureSuccessStatusCode();
-
-        byte[] content = await response.Content.ReadAsByteArrayAsync();
-        await File.WriteAllBytesAsync(filePath, content);
+        var gitHubClient = new GitHubClient(new ProductHeaderValue("WallpaperApp"));
+        var repositoryContents = await gitHubClient.Repository.Content.GetAllContents("D3Ext", "aesthetic-wallpapers"); 
+        // Console.WriteLine(repositoryContents[0].Path);
+        RepositoryContent? firstOrDefault = repositoryContents.FirstOrDefault(c => c.Path == @"path-of-the-file-you-want");
+        string? downloadUrl = firstOrDefault?.DownloadUrl;
+        return downloadUrl;
     }
 
     private static void SetWallpaper(string imagePath)
