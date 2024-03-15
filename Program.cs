@@ -22,10 +22,15 @@ internal class BackgroundChanger
 
     private static async Task<string> GetInfo()
     {
+        //Creates a new 'GithubClient" which a feature of OctoKit, which allows access to the github API
         var gitHubClient = new GitHubClient(new ProductHeaderValue("WallpaperApp"));
-        var repositoryContents = await gitHubClient.Repository.Content.GetAllContents("D3Ext", "aesthetic-wallpapers"); 
-        // Console.WriteLine(repositoryContents[0].Path);
-        RepositoryContent? firstOrDefault = repositoryContents.FirstOrDefault(c => c.Path == @"path-of-the-file-you-want");
+        //Asynchronously gets all the contents of a github repo. In this case, I am using a wallpaper repository.
+        var repositoryContents = await gitHubClient.Repository.Content.GetAllContents("D3Ext", "aesthetic-wallpapers");
+        Console.WriteLine(repositoryContents);
+        //Uses the repo that we got earlier to search the given path
+        RepositoryContent? firstOrDefault = repositoryContents.FirstOrDefault(c => c.Path == @"images/3squares.png");
+        Console.WriteLine(firstOrDefault);
+        //Gets the raw download url from the file path, and returns it
         string? downloadUrl = firstOrDefault?.DownloadUrl;
         return downloadUrl;
     }
